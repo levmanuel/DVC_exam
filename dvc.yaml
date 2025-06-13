@@ -1,0 +1,49 @@
+stages:
+  data_splitting:
+    cmd: python src/data/data_splitting.py
+    deps:
+      - src/data/data_splitting.py
+    outs:
+      - data/processed_data/X_train.csv
+      - data/processed_data/X_test.csv
+      - data/processed_data/y_train.csv
+      - data/processed_data/y_test.csv
+
+  data_normalization:
+    cmd: python src/data/data_normalization.py
+    deps:
+      - src/data/data_normalization.py
+      - data/processed_data/X_train.csv
+      - data/processed_data/X_test.csv
+    outs:
+      - data/processed_data/X_train_scaled.csv
+      - data/processed_data/X_test_scaled.csv
+
+  grid_search:
+    cmd: python src/data/grid_search.py
+    deps:
+      - src/data/grid_search.py
+      - data/processed_data/X_train_scaled.csv
+      - data/processed_data/y_train.csv
+    outs:
+      - models/best_rf_params.pkl
+
+  model_training:
+    cmd: python src/data/model_training.py
+    deps:
+      - src/data/model_training.py
+      - data/processed_data/X_train_scaled.csv
+      - data/processed_data/y_train.csv
+      - models/best_rf_params.pkl
+    outs:
+      - models/best_rf_model.pkl
+
+  model_evaluation:
+    cmd: python src/data/model_eval.py
+    deps:
+      - src/data/model_eval.py
+      - data/processed_data/X_test_scaled.csv
+      - data/processed_data/y_test.csv
+      - models/best_rf_model.pkl
+    metrics:
+      - metrics/scores.json
